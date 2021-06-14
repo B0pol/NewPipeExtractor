@@ -10,6 +10,7 @@ import java.net.URLEncoder;
 import java.util.List;
 
 import static org.schabi.newpipe.extractor.services.bandcamp.extractors.BandcampExtractorHelper.BASE_URL;
+import static org.schabi.newpipe.extractor.utils.Utils.UTF_8;
 
 public class BandcampSearchQueryHandlerFactory extends SearchQueryHandlerFactory {
 
@@ -20,7 +21,7 @@ public class BandcampSearchQueryHandlerFactory extends SearchQueryHandlerFactory
         try {
 
             return BASE_URL + "/search?q=" +
-                    URLEncoder.encode(query, "UTF-8")
+                    URLEncoder.encode(query, UTF_8)
                     + "&page=1";
 
         } catch (final UnsupportedEncodingException e) {

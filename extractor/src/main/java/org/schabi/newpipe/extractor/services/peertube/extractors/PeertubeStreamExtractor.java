@@ -214,7 +214,8 @@ public class PeertubeStreamExtractor extends StreamExtractor {
         // mp4
         try {
             videoStreams.addAll(getVideoStreamsFromArray(json.getArray("files")));
-        } catch (Exception ignored) { }
+        } catch (Exception ignored) {
+        }
         // HLS
         try {
             final JsonArray streamingPlaylists = json.getArray("streamingPlaylists");
@@ -344,7 +345,7 @@ public class PeertubeStreamExtractor extends StreamExtractor {
             params.append("&tagsOneOf=");
             params.append(URLEncoder.encode(tag, UTF_8));
         }
-        return url + "?" + params.toString();
+        return url + "?" + params;
     }
 
     private void getStreamsFromApi(final StreamInfoItemsCollector collector, final String apiUrl) throws ReCaptchaException, IOException, ParsingException {

@@ -32,27 +32,28 @@ public class YoutubeSearchQueryHandlerFactory extends SearchQueryHandlerFactory 
     @Override
     public String getUrl(String searchString, List<String> contentFilters, String sortFilter) throws ParsingException {
         try {
+            final String encodedSearchString = URLEncoder.encode(searchString, UTF_8);
             if (!contentFilters.isEmpty()) {
                 switch (contentFilters.get(0)) {
                     case ALL:
                     default:
                         break;
                     case VIDEOS:
-                        return SEARCH_URL + URLEncoder.encode(searchString, UTF_8) + "&sp=EgIQAQ%253D%253D";
+                        return SEARCH_URL + encodedSearchString + "&sp=EgIQAQ%253D%253D";
                     case CHANNELS:
-                        return SEARCH_URL + URLEncoder.encode(searchString, UTF_8) + "&sp=EgIQAg%253D%253D";
+                        return SEARCH_URL + encodedSearchString + "&sp=EgIQAg%253D%253D";
                     case PLAYLISTS:
-                        return SEARCH_URL + URLEncoder.encode(searchString, UTF_8) + "&sp=EgIQAw%253D%253D";
+                        return SEARCH_URL + encodedSearchString + "&sp=EgIQAw%253D%253D";
                     case MUSIC_SONGS:
                     case MUSIC_VIDEOS:
                     case MUSIC_ALBUMS:
                     case MUSIC_PLAYLISTS:
                     case MUSIC_ARTISTS:
-                        return MUSIC_SEARCH_URL + URLEncoder.encode(searchString, UTF_8);
+                        return MUSIC_SEARCH_URL + encodedSearchString;
                 }
             }
 
-            return SEARCH_URL + URLEncoder.encode(searchString, UTF_8);
+            return SEARCH_URL + encodedSearchString;
         } catch (UnsupportedEncodingException e) {
             throw new ParsingException("Could not encode query", e);
         }

@@ -19,10 +19,12 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.schabi.newpipe.extractor.services.bandcamp.extractors.BandcampExtractorHelper.BASE_API_URL;
+import static org.schabi.newpipe.extractor.utils.Utils.UTF_8;
 
 public class BandcampSuggestionExtractor extends SuggestionExtractor {
 
     private static final String AUTOCOMPLETE_URL = BASE_API_URL + "/fuzzysearch/1/autocomplete?q=";
+
     public BandcampSuggestionExtractor(final StreamingService service) {
         super(service);
     }
@@ -33,7 +35,7 @@ public class BandcampSuggestionExtractor extends SuggestionExtractor {
 
         try {
             final JsonObject fuzzyResults = JsonParser.object().from(
-                    downloader.get(AUTOCOMPLETE_URL + URLEncoder.encode(query, "UTF-8")).responseBody()
+                    downloader.get(AUTOCOMPLETE_URL + URLEncoder.encode(query, UTF_8)).responseBody()
             );
 
             final JsonArray jsonArray = fuzzyResults.getObject("auto")
