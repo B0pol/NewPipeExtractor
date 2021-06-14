@@ -27,13 +27,13 @@ import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLEncoder;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static java.util.Collections.singletonList;
 import static org.schabi.newpipe.extractor.ServiceList.SoundCloud;
@@ -119,9 +119,12 @@ public class SoundcloudParsingHelper {
      */
     public static JsonObject resolveFor(@Nonnull final Downloader downloader, final String url)
             throws IOException, ExtractionException {
-        final String apiUrl = SOUNDCLOUD_API_V2_URL + "resolve"
-                + "?url=" + URLEncoder.encode(url, UTF_8) 
-                + "&client_id=" + clientId();
+
+        final Map<String, String> params = new HashMap<>();
+        params.put("url", url);
+        params.put("client_id", clientId());
+        final String apiUrl = SOUNDCLOUD_API_V2_URL + "resolve?"
+                + buildSearchParameters(params);
 
         try {
             final String response = downloader.get(apiUrl, SoundCloud.getLocalization())
@@ -141,8 +144,10 @@ public class SoundcloudParsingHelper {
     public static String resolveUrlWithEmbedPlayer(final String apiUrl) throws IOException,
             ReCaptchaException {
 
-        final String response = NewPipe.getDownloader().get("https://w.soundcloud.com/player/?url="
-                + URLEncoder.encode(apiUrl, UTF_8), SoundCloud.getLocalization()).responseBody();
+        final Map<String, String> params = new HashMap<>();
+        params.put("url", apiUrl);
+        final String response = NewPipe.getDownloader().get("https://w.soundcloud.com/player/?"
+                + buildSearchParameters(params), SoundCloud.getLocalization()).responseBody();
 
         return Jsoup.parse(response).select("link[rel=\"canonical\"]").first()
                 .attr("abs:href");
@@ -170,9 +175,12 @@ public class SoundcloudParsingHelper {
         }
 
         try {
-            final String widgetUrl = "https://api-widget.soundcloud.com/resolve?url="
-                    + URLEncoder.encode(url.toString(), UTF_8)
-                    + "&format=json&client_id=" + SoundcloudParsingHelper.clientId();
+            final Map<String, String> params = new HashMap<>();
+            params.put("url", url.toString());
+            params.put("format", "json");
+            params.put("client_id", "json");
+            final String widgetUrl = "https://api-widget.soundcloud.com/resolve?"
+                    + buildSearchParameters(params);
             final String response = NewPipe.getDownloader().get(widgetUrl,
                     SoundCloud.getLocalization()).responseBody();
             final JsonObject o = JsonParser.object().from(response);

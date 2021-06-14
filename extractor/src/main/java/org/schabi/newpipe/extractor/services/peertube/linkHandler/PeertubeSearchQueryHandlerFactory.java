@@ -5,10 +5,11 @@ import org.schabi.newpipe.extractor.exceptions.ParsingException;
 import org.schabi.newpipe.extractor.linkhandler.SearchQueryHandlerFactory;
 
 import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-import static org.schabi.newpipe.extractor.utils.Utils.UTF_8;
+import static org.schabi.newpipe.extractor.utils.Utils.buildSearchParameters;
 
 public class PeertubeSearchQueryHandlerFactory extends SearchQueryHandlerFactory {
 
@@ -35,7 +36,9 @@ public class PeertubeSearchQueryHandlerFactory extends SearchQueryHandlerFactory
     @Override
     public String getUrl(String searchString, List<String> contentFilters, String sortFilter, String baseUrl) throws ParsingException {
         try {
-            return baseUrl + SEARCH_ENDPOINT + "?search=" + URLEncoder.encode(searchString, UTF_8);
+            final Map<String, String> params = new HashMap<>();
+            params.put("search", searchString);
+            return baseUrl + SEARCH_ENDPOINT + "?" + buildSearchParameters(params);
         } catch (UnsupportedEncodingException e) {
             throw new ParsingException("Could not encode query", e);
         }

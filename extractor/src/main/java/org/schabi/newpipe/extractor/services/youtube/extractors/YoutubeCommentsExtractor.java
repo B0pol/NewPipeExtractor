@@ -29,8 +29,7 @@ import java.util.Map;
 import java.util.regex.Pattern;
 
 import static java.util.Collections.singletonList;
-import static org.schabi.newpipe.extractor.utils.Utils.UTF_8;
-import static org.schabi.newpipe.extractor.utils.Utils.isNullOrEmpty;
+import static org.schabi.newpipe.extractor.utils.Utils.*;
 
 public class YoutubeCommentsExtractor extends CommentsExtractor {
     // using the mobile site for comments because it loads faster and uses get requests instead of post
@@ -75,12 +74,12 @@ public class YoutubeCommentsExtractor extends CommentsExtractor {
     }
 
     private Page getNextPage(String continuation) throws ParsingException {
-        Map<String, String> params = new HashMap<>();
+        final Map<String, String> params = new HashMap<>();
         params.put("action_get_comments", "1");
         params.put("pbj", "1");
         params.put("ctoken", continuation);
         try {
-            return new Page("https://m.youtube.com/watch_comment?" + getDataString(params));
+            return new Page("https://m.youtube.com/watch_comment?" + buildSearchParameters(params));
         } catch (UnsupportedEncodingException e) {
             throw new ParsingException("Could not get next page url", e);
         }
@@ -145,21 +144,6 @@ public class YoutubeCommentsExtractor extends CommentsExtractor {
         requestHeaders.put("X-YouTube-Client-Version", singletonList(ytClientVersion));
         requestHeaders.put("X-YouTube-Client-Name", singletonList(ytClientName));
         return getDownloader().get(siteUrl, requestHeaders, getExtractorLocalization()).responseBody();
-    }
-
-    private String getDataString(Map<String, String> params) throws UnsupportedEncodingException {
-        StringBuilder result = new StringBuilder();
-        boolean first = true;
-        for (Map.Entry<String, String> entry : params.entrySet()) {
-            if (first)
-                first = false;
-            else
-                result.append("&");
-            result.append(URLEncoder.encode(entry.getKey(), UTF_8));
-            result.append("=");
-            result.append(URLEncoder.encode(entry.getValue(), UTF_8));
-        }
-        return result.toString();
     }
 
     private String findValue(final String doc, final String start, final String end) {

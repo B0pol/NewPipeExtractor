@@ -13,12 +13,13 @@ import org.schabi.newpipe.extractor.services.soundcloud.SoundcloudParsingHelper;
 import org.schabi.newpipe.extractor.suggestion.SuggestionExtractor;
 
 import java.io.IOException;
-import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.schabi.newpipe.extractor.services.soundcloud.SoundcloudParsingHelper.SOUNDCLOUD_API_V2_URL;
-import static org.schabi.newpipe.extractor.utils.Utils.UTF_8;
+import static org.schabi.newpipe.extractor.utils.Utils.buildSearchParameters;
 
 public class SoundcloudSuggestionExtractor extends SuggestionExtractor {
 
@@ -31,9 +32,13 @@ public class SoundcloudSuggestionExtractor extends SuggestionExtractor {
             ExtractionException {
         final List<String> suggestions = new ArrayList<>();
         final Downloader dl = NewPipe.getDownloader();
-        final String url = SOUNDCLOUD_API_V2_URL + "search/queries" + "?q="
-                + URLEncoder.encode(query, UTF_8) + "&client_id="
-                + SoundcloudParsingHelper.clientId() + "&limit=10";
+
+        final Map<String, String> params = new HashMap<>();
+        params.put("q", query);
+        params.put("client_id", SoundcloudParsingHelper.clientId());
+        params.put("limit", "10");
+        final String url = SOUNDCLOUD_API_V2_URL + "search/queries?"
+                + buildSearchParameters(params);
         final String response = dl.get(url, getExtractorLocalization()).responseBody();
 
         try {

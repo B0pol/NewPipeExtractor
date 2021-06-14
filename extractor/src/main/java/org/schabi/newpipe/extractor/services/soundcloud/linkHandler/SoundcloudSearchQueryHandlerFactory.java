@@ -9,10 +9,13 @@ import org.schabi.newpipe.extractor.services.soundcloud.SoundcloudParsingHelper;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.schabi.newpipe.extractor.services.soundcloud.SoundcloudParsingHelper.SOUNDCLOUD_API_V2_URL;
 import static org.schabi.newpipe.extractor.utils.Utils.UTF_8;
+import static org.schabi.newpipe.extractor.utils.Utils.buildSearchParameters;
 
 public class SoundcloudSearchQueryHandlerFactory extends SearchQueryHandlerFactory {
 
@@ -48,9 +51,12 @@ public class SoundcloudSearchQueryHandlerFactory extends SearchQueryHandlerFacto
                 }
             }
 
-            return url + "?q=" + URLEncoder.encode(id, UTF_8) + "&client_id="
-                    + SoundcloudParsingHelper.clientId() + "&limit=" + ITEMS_PER_PAGE
-                    + "&offset=0";
+            final Map<String, String> params = new HashMap<>();
+            params.put("q", id);
+            params.put("client_id", SoundcloudParsingHelper.clientId());
+            params.put("limit", String.valueOf(ITEMS_PER_PAGE));
+            params.put("offset", "0");
+            return url + "?" + buildSearchParameters(params);
 
         } catch (final UnsupportedEncodingException e) {
             throw new ParsingException("Could not encode query", e);
