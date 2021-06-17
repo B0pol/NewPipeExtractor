@@ -16,15 +16,7 @@ import org.schabi.newpipe.extractor.MetaInfo;
 import org.schabi.newpipe.extractor.NewPipe;
 import org.schabi.newpipe.extractor.StreamingService;
 import org.schabi.newpipe.extractor.downloader.Downloader;
-import org.schabi.newpipe.extractor.exceptions.AgeRestrictedContentException;
-import org.schabi.newpipe.extractor.exceptions.ContentNotAvailableException;
-import org.schabi.newpipe.extractor.exceptions.ExtractionException;
-import org.schabi.newpipe.extractor.exceptions.GeographicRestrictionException;
-import org.schabi.newpipe.extractor.exceptions.PaidContentException;
-import org.schabi.newpipe.extractor.exceptions.ParsingException;
-import org.schabi.newpipe.extractor.exceptions.PrivateContentException;
-import org.schabi.newpipe.extractor.exceptions.ReCaptchaException;
-import org.schabi.newpipe.extractor.exceptions.YoutubeMusicPremiumContentException;
+import org.schabi.newpipe.extractor.exceptions.*;
 import org.schabi.newpipe.extractor.linkhandler.LinkHandler;
 import org.schabi.newpipe.extractor.localization.DateWrapper;
 import org.schabi.newpipe.extractor.localization.Localization;
@@ -112,18 +104,24 @@ public class YoutubeStreamExtractor extends StreamExtractor {
     @Override
     public String getName() throws ParsingException {
         assertPageFetched();
-        String title = null;
+        // Title in original language
+        String title = playerResponse.getObject("videoDetails").getString("title");
 
-        try {
-            title = getTextFromObject(getVideoPrimaryInfoRenderer().getObject("title"));
-        } catch (final ParsingException ignored) {
-            // age-restricted videos cause a ParsingException here
-        }
-
+        // Fallback : requested language (if translated in that language)
+        // as NewPipe only supports English for YouTube, we use original language first instead of requested
         if (isNullOrEmpty(title)) {
-            title = playerResponse.getObject("videoDetails").getString("title");
+            try {
+                title = getTextFromObject(getVideoPrimaryInfoRenderer().getObject("title"));
+            } catch (final ParsingException ignored) {
+                // age-restricted videos cause a ParsingException here
+            }
 
-            if (isNullOrEmpty(title)) throw new ParsingException("Could not get name");
+            if (isNullOrEmpty(title)) {
+                title = getTextFromObject(playerResponse.getObject("microformat")
+                        .getObject("playerMicroformatRenderer").getObject("title"));
+
+                if (isNullOrEmpty(title)) throw new ParsingException("Could not get name");
+            }
         }
 
         return title;
@@ -212,16 +210,18 @@ public class YoutubeStreamExtractor extends StreamExtractor {
     @Override
     public Description getDescription() throws ParsingException {
         assertPageFetched();
-        // description with more info on links
-        try {
-            String description = getTextFromObject(getVideoSecondaryInfoRenderer().getObject("description"), true);
-            if (!isNullOrEmpty(description)) return new Description(description, Description.HTML);
-        } catch (final ParsingException ignored) {
-            // age-restricted videos cause a ParsingException here
-        }
-
+        // description in original language
         String description = playerResponse.getObject("videoDetails").getString("shortDescription");
         if (description == null) {
+
+            // description with more info on links
+            try {
+                description = getTextFromObject(getVideoSecondaryInfoRenderer().getObject("description"), true);
+                if (!isNullOrEmpty(description)) return new Description(description, Description.HTML);
+            } catch (final ParsingException ignored) {
+                // age-restricted videos cause a ParsingException here
+            }
+
             final JsonObject descriptionObject = playerResponse.getObject("microformat")
                     .getObject("playerMicroformatRenderer").getObject("description");
             description = getTextFromObject(descriptionObject);
